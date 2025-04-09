@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Edycja zadania</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f6f8fa;
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #444;
+            font-weight: bold;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            margin-top: 5px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .button-row {
+            text-align: center;
+        }
+        .actionBtn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            margin: 10px 10px 0 0; /* większy prawy margines */
+            cursor: pointer;
+                    }
+        #saveBtn {
+            background-color: #4CAF50;
+            color: white;
+            margin-right: 10px;
+        }
+
+        #deleteBtn {
+            background-color: #d9534f;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>EDYCJA ZADANIA</h1>
+
+    <form id="editForm">
+        <label>
+            Tytuł:
+            <input type="text" id="title" required>
+        </label>
+
+        <label>
+            Opis:
+            <input type="text" id="description" required>
+        </label>
+
+        <label>
+            Status:
+            <select id="status">
+                <option value="created">created</option>
+                <option value="in process">in process</option>
+                <option value="done">done</option>
+            </select>
+        </label>
+<!--
+        <button type="submit" id="saveBtn">Zapisz</button>
+        <button type="button" id="deleteBtn">USUŃ</button>
+        <button type="button" onclick="window.location.href='/frontend'" style="background-color: magenta;">
+            Powrót
+        </button> -->
+        <div class="button-row">
+            <button type="submit" class="actionBtn green" id="saveBtn">Zapisz</button>
+            <button type="button" class="actionBtn red" id="deleteBtn">Usuń</button>
+            <button type="button" class="actionBtn orange" onclick="window.location.href='/frontend'">Powrót</button>
+        </div>
+
+
+    </form>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const taskId = params.get('id');
+
+        if (!taskId) {
+            alert('Brak ID zadania w adresie URL.');
+            window.location.href = '/frontend';
+        }
+
+        async function loadTask() {
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/tasks/${taskId}`);
+                if (!response.ok) throw new Error('Nie można pobrać zadania.');
+                const task = await response.json();
+
+                document.getElementById('title').value = task.title;
+                document.getElementById('description').value = task.description;
+                document.getElementById('status').value = task.status;
+            } catch (error) {
+                alert('Błąd przy ładowaniu zadania.');
+                console.error(error);
+            }
+        }
+
+        document.getElementById('editForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const updatedTask = {
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                status: document.getElementById('status').value
+            };
+
+            const response = await fetch(`http://127.0.0.1:5000/tasks/${taskId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedTask)
+            });
+
+            if (response.ok) {
+                alert('Zadanie zaktualizowane!');
+                window.location.href = '/frontend';
+            } else {
+                alert('Błąd przy aktualizacji.');
+            }
+        });
+
+        document.getElementById('deleteBtn').addEventListener('click', async function () {
+            if (confirm('Na pewno chcesz usunąć to zadanie?')) {
+                const response = await fetch(`http://127.0.0.1:5000/tasks/${taskId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('Zadanie usunięte.');
+                    window.location.href = '/frontend';
+                } else {
+                    alert('Błąd przy usuwaniu.');
+                }
+            }
+        });
+
+        loadTask(); // 🔁 Uruchamiamy ładowanie danych po załadowaniu strony
+    </script>
+</body>
+</html>

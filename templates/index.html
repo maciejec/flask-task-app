@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista zadań</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f6f8fa;
+            padding: 30px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #e9ecef;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+            cursor: pointer;
+        }
+
+        .selected {
+            background-color: #d0eaff !important;
+            font-weight: bold;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #importBtn {
+            display: block;
+            margin: 0 auto;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Moje zadania</h1>
+
+    <button id="importBtn" onclick="loadTasks()">Importuj</button>
+
+    <table id="taskTable">
+        <thead>
+            <tr>
+                <th>Tytuł</th>
+                <th>Opis</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Zadania będą tutaj -->
+        </tbody>
+    </table>
+
+    <h2>Nowe zadanie</h2>
+    <form id="taskForm">
+        <label>
+            Tytuł:
+            <input type="text" id="title" required>
+        </label>
+
+        <label>
+            Opis:
+            <input type="text" id="description" required>
+        </label>
+
+        <label>
+            Status:
+            <select id="status">
+                <option value="created">created</option>
+                <option value="in process">in process</option>
+                <option value="done">done</option>
+            </select>
+        </label>
+
+        <button type="submit">Zapisz</button>
+    </form>
+
+    <script>
+        let selectedTaskId = null;
+
+        async function loadTasks() {
+            const response = await fetch('http://127.0.0.1:5000/tasks');
+            const tasks = await response.json();
+
+            const tbody = document.querySelector('#taskTable tbody');
+            tbody.innerHTML = '';
+
+            tasks.forEach(task => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${task.title}</td>
+                    <td>${task.description}</td>
+                    <td>${task.status}</td>
+                `;
+
+                row.dataset.id = task.id;
+
+                // Kliknięcie – zaznaczenie
+                row.addEventListener('click', () => {
+                    document.querySelectorAll('#taskTable tr').forEach(tr => tr.classList.remove('selected'));
+                    row.classList.add('selected');
+                    selectedTaskId = task.id;
+                    console.log('Zaznaczone zadanie ID:', selectedTaskId);
+                });
+
+                // Podwójne kliknięcie – edycja
+                row.addEventListener('dblclick', () => {
+                    window.location.href = `/edit.html?id=${task.id}`;
+                });
+
+                tbody.appendChild(row);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('taskForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const title = document.getElementById('title').value;
+                const description = document.getElementById('description').value;
+                const status = document.getElementById('status').value;
+
+                const response = await fetch('http://127.0.0.1:5000/tasks', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        description: description,
+                        status: status
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Zadanie zapisane!');
+                    document.getElementById('taskForm').reset();
+                    loadTasks(); // odśwież tabelę
+                } else {
+                    alert('Błąd przy zapisie zadania.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
