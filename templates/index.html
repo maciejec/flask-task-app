@@ -131,7 +131,7 @@
         let selectedTaskId = null;
 
         async function loadTasks() {
-            const response = await fetch('http://127.0.0.1:5000/tasks');
+            const response = await fetch('/tasks');
             const tasks = await response.json();
 
             const tbody = document.querySelector('#taskTable tbody');
@@ -147,7 +147,6 @@
 
                 row.dataset.id = task.id;
 
-                // Kliknięcie – zaznaczenie
                 row.addEventListener('click', () => {
                     document.querySelectorAll('#taskTable tr').forEach(tr => tr.classList.remove('selected'));
                     row.classList.add('selected');
@@ -155,7 +154,6 @@
                     console.log('Zaznaczone zadanie ID:', selectedTaskId);
                 });
 
-                // Podwójne kliknięcie – edycja
                 row.addEventListener('dblclick', () => {
                     window.location.href = `/edit.html?id=${task.id}`;
                 });
@@ -172,7 +170,7 @@
                 const description = document.getElementById('description').value;
                 const status = document.getElementById('status').value;
 
-                const response = await fetch('http://127.0.0.1:5000/tasks', {
+                const response = await fetch('/tasks', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -187,7 +185,7 @@
                 if (response.ok) {
                     alert('Zadanie zapisane!');
                     document.getElementById('taskForm').reset();
-                    loadTasks(); // odśwież tabelę
+                    loadTasks();
                 } else {
                     alert('Błąd przy zapisie zadania.');
                 }
