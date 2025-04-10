@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 # Konfiguracja bazy danych SQLite
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tasks.db'
