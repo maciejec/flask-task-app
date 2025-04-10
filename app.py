@@ -119,7 +119,17 @@ def get_task(id):
 
 @app.route('/tasks/<int:id>', methods=['PUT'])
 def update_task(id):
-    ...
+    data = request.get_json()
+    task = Task.query.get_or_404(id)
+
+    task.title = data.get('title', task.title)
+    task.description = data.get('description', task.description)
+    task.status = data.get('status', task.status)
+
+    db.session.commit()
+
+    return jsonify({'message': 'Zadanie zaktualizowane.'})
+
 
 @app.route('/tasks/<int:id>', methods=['DELETE'])
 def delete_task(id):
