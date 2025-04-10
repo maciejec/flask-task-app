@@ -141,7 +141,7 @@
                 status: document.getElementById('status').value
             };
 
-            const response = await fetch(`http://127.0.0.1:5000/tasks/${taskId}`, {
+            const response = await fetch(`/tasks/${taskId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
