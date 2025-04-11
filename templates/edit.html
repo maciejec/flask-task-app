@@ -159,8 +159,8 @@
 
         document.getElementById('deleteBtn').addEventListener('click', async function () {
             if (confirm('Na pewno chcesz usunąć to zadanie?')) {
-                const response = await fetch(`http://127.0.0.1:5000/tasks/${taskId}`, {
-                    method: 'DELETE'
+                const response = await fetch(`https://flask-task-app-nw05.onrender.com/tasks/${taskId}`, {
+                method: 'DELETE'
                 });
 
                 if (response.ok) {
